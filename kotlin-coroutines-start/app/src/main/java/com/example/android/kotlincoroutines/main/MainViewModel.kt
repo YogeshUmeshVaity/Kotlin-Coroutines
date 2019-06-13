@@ -51,7 +51,7 @@ class MainViewModel : ViewModel() {
     /**
      * When you cancel the Job of a scope, it cancels all coroutines started in that scope.
      */
-    val viewModelJob = Job()
+    private val viewModelJob = Job()
 
     /**
      * All coroutines run inside a coroutine scope.
@@ -70,6 +70,16 @@ class MainViewModel : ViewModel() {
             // use postValue since we're in a background thread
             _snackBar.postValue("Hello, from threads!")
         }
+    }
+
+    /**
+     * When viewModelJob is cancelled every coroutine started by uiScope will be cancelled as well.
+     * If you don't pass Job to the scope, the scope will run until you app is terminated.
+     * If that's not what you intended, you will be leaking memory.
+     */
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 
     /**
