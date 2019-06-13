@@ -20,6 +20,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.android.kotlincoroutines.util.BACKGROUND
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 
 /**
  * MainViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
@@ -44,6 +47,18 @@ class MainViewModel : ViewModel() {
      */
     val snackbar: LiveData<String>
         get() = _snackBar
+
+    /**
+     * When you cancel the Job of a scope, it cancels all coroutines started in that scope.
+     */
+    val viewModelJob = Job()
+
+    /**
+     * All coroutines run inside a coroutine scope.
+     * We use the CoroutineContext plus operator to define the threading policy (Dispatchers.Main)
+     * and the job (viewModelJob). The resulting CoroutineContext is an indexed set of both contexts.
+     */
+    val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     /**
      * Wait one second then display a snackbar.
