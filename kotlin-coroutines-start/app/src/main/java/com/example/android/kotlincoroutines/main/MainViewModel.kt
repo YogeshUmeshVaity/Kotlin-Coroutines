@@ -19,10 +19,9 @@ package com.example.android.kotlincoroutines.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.android.kotlincoroutines.util.BACKGROUND
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * MainViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
@@ -51,24 +50,22 @@ class MainViewModel : ViewModel() {
     /**
      * When you cancel the Job of a scope, it cancels all coroutines started in that scope.
      */
-    private val viewModelJob = Job()
+    // private val viewModelJob = Job()
 
     /**
      * All coroutines run inside a coroutine scope.
      * We use the CoroutineContext plus operator to define the threading policy (Dispatchers.Main)
      * and the job (viewModelJob). The resulting CoroutineContext is an indexed set of both contexts.
      */
-    val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    // val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     /**
      * Wait one second then display a snackbar.
      */
     fun onMainViewClicked() {
-        // TODO: Replace with coroutine implementation
-        BACKGROUND.submit {
-            Thread.sleep(1_000)
-            // use postValue since we're in a background thread
-            _snackBar.postValue("Hello, from threads!")
+        viewModelScope.launch {
+            delay(1000) // Some work done on other thread
+            _snackBar.value = "Hello, from coroutines!"
         }
     }
 
@@ -77,10 +74,10 @@ class MainViewModel : ViewModel() {
      * If you don't pass Job to the scope, the scope will run until you app is terminated.
      * If that's not what you intended, you will be leaking memory.
      */
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
+//    override fun onCleared() {
+//        super.onCleared()
+//        viewModelJob.cancel()
+//    }
 
     /**
      * Called immediately after the UI shows the snackbar.
