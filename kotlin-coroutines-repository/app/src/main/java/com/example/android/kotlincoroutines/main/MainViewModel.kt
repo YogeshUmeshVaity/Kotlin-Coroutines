@@ -21,6 +21,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android.kotlincoroutines.util.singleArgViewModelFactory
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -99,29 +100,39 @@ class MainViewModel(private val repository: TitleRepository) : ViewModel() {
     /**
      * Refresh the title, showing a loading spinner while it refreshes and errors via snackbar.
      */
-    fun refreshTitle() {
-        viewModelScope.launch {
-            try {
-                _spinner.value = true
-                repository.refreshTitle()
-            } catch (error: TitleRefreshError) {
-                _snackBar.value = error.message
-            } finally {
-                _spinner.value = false
-            }
+    private fun refreshTitle() {
+        launchDataLoad {
+            repository.refreshTitle()
         }
     }
 
     /**
-     * Helper function to call a data load function with a loading spinner, errors will trigger a
-     * snackbar.
+     * By abstracting the logic around showing a loading spinner and showing errors,
+     * we've simplified our actual code needed to load data. Showing a spinner or displaying an
+     * error is something that's easy to generalize to any data loading, while the actual data
+     * source and destination needs to be specified every time.
+
+     * To build this abstraction, launchDataLoad takes an argument block that is a suspend lambda.
+     * A suspend lambda allows you to call suspend functions.
      *
-     * By marking `block` as `suspend` this creates a suspend lambda which can call suspend
-     * functions.
+     * You don't often have to declare your own suspend lambdas, but they can be helpful to create
+     * abstractions like this that encapsulate repeated logic!
      *
      * @param block lambda to actually load data. It is called in the viewModelScope. Before calling the
      *              lambda the loading spinner will display, after completion or error the loading
      *              spinner will stop
      */
-    // TODO: Add launchDataLoad here then refactor refreshTitle to use it
+    private fun launchDataLoad(block: suspend () -> Unit): Job {
+        return viewModelScope.launch {
+            try {
+                _spinner.value = true
+                block()
+            } catch (error: TitleRefreshError) {
+                _snackBar.value = error.message
+            } finally {
+                _spinner.value = false
+            }
+
+        }
+    }
 }
