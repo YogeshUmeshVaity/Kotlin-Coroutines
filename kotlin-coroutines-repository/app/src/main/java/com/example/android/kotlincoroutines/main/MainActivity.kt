@@ -16,16 +16,16 @@
 
 package com.example.android.kotlincoroutines.main
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.constraintlayout.widget.ConstraintLayout
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.example.android.kotlincoroutines.R
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * Show layout.activity_main and setup data binding.
@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             .of(this, MainViewModel.FACTORY(repository))
             .get(MainViewModel::class.java)
 
+        // Todo: refactor these statements to separate functions
         // When rootLayout is clicked call onMainViewClicked in ViewModel
         rootLayout.setOnClickListener {
             viewModel.onMainViewClicked()
